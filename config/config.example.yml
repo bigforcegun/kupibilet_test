@@ -1,0 +1,33 @@
+production:
+  host: '127.0.0.1'
+  port: 8181
+  repository:
+    type: 'redis'
+    namespace: 'url_shortener'
+    namespace_separator: ':'
+    host: 'localhost'
+    port: '6379'
+    password: ''
+    db: '0'
+development:
+  host: '127.0.0.1'
+  port: 8181
+  repository:
+     type: 'redis'
+       namespace: 'url_shortener_dev'
+       namespace_separator: ':'
+       host: 'localhost'
+       port: '6379'
+       password: ''
+       db: '0'
+test:
+  host: '127.0.0.1'
+  port: 8181
+  repository:
+       type: 'redis'
+         namespace: 'url_shortener_test'
+         namespace_separator: ':'
+         host: 'localhost'
+         port: '6379'
+         password: ''
+         db: '2'

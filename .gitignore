@@ -1,2 +1,5 @@
 .idea
 Gemfile.lock
+debug
+config/config.yml
+spec
