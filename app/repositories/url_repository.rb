@@ -17,6 +17,17 @@ class UrlRepository
     raise('Must be implemented on sub-class')
   end
 
+  # @param [String] url
+  # @return [String|nil]
+  def find_or_create_short_url(url)
+    raise('Must be implemented on sub-class')
+  end
+
+
+  def clear_db
+    raise('Must be implemented on sub-class')
+  end
+
   def clear_urls
 
   end

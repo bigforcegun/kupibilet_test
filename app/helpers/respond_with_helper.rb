@@ -12,6 +12,7 @@ module Sinatra
       # Пишет в body ошибку и закрывает стрим
       # @param [String] error
       def respond_with_error(error)
+        status 400
         body error
       end
 
@@ -24,7 +25,6 @@ module Sinatra
       # Пишет в body json с ошибкой и закрывает стрим
       # @param [String] error_msg
       def respond_with_json_error(error_msg)
-
         response = {
             :error => error_msg
         }

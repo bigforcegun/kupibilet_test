@@ -1,19 +1,21 @@
 require_relative '../app/helpers/respond_with_helper'
+require_relative '../app/helpers/url_helper'
 
 class UrlShortenerApi < Sinatra::Base
 
   register Sinatra::ConfigFile
   register Sinatra::Async
   helpers Sinatra::UrlShortenerApi::RespondWithHelper
+  helpers Sinatra::UrlShortenerApi::UrlHelper
+
 
   config_file '../config/config.yml'
 
   configure do
     # threaded - False: Will take requests on the reactor thread
     set :threaded, false
-    # sinatra way?
-    #set :environment, :test
 
+    # sinatra way?
     set :url_repository, RedisUrlRepository.new(settings.repository)
   end
 
@@ -24,23 +26,16 @@ class UrlShortenerApi < Sinatra::Base
       settings.url_repository
     end
 
-    # Собирает урл для редиректа из ключа и того, что мы написали в config.yml
-    # @param [String] url_key
-    def build_redirect_url(url_key)
-      "http://#{settings.host}:#{settings.port}/#{url_key}"
-    end
-
     # Достает longUrl и проверяет все ли хорошо на пришло
-    # @param [Stream] out
     def get_long_url
       request.body.rewind
       request_body = JSON.parse(request.body.read) rescue nil
       if request_body.nil? || !request_body.include?('longUrl')
-        respond_with_error('Incorrect input json')
+        respond_with_json_error('Incorrect input json')
       end
       long_url = request_body['longUrl']
       if long_url.nil? || long_url.scan(URI.regexp).size == 0
-        respond_with_error("Incorrect longUrl parameter '#{long_url}'")
+        respond_with_json_error("Incorrect longUrl parameter '#{long_url}'")
       end
       long_url
     end
@@ -61,11 +56,11 @@ class UrlShortenerApi < Sinatra::Base
     begin
       url_key = aparams[:url_key]
       if url_key.nil?
-        respond_with_error("Can't found url or provided key '#{url_key}'")
+        respond_with_error("Can't found url for provided key '#{url_key}'")
       end
       self.url_repository.load_long_url_by_key(url_key) do |long_url|
         if long_url.nil?
-          respond_with_error("Can't found url or provided key '#{url_key}'")
+          respond_with_error("Can't found url for provided key '#{url_key}'")
         else
           respond_with_redirect(long_url)
         end
@@ -76,12 +71,10 @@ class UrlShortenerApi < Sinatra::Base
   end
 
   apost '/' do
-
     content_type 'application/json'
     api_response = {}
     begin
       long_url = get_long_url
-
       self.url_repository.create_new_short_url(long_url) do |url_key|
         api_response[:url] = build_redirect_url(url_key)
         respond_with_json(api_response)
@@ -89,13 +82,12 @@ class UrlShortenerApi < Sinatra::Base
     rescue => e
       respond_with_json_error("Error while process request with message - #{e.message}")
     end
-
   end
 
 
+=begin
   # асинхронность через [Sinatra::Stream]
   # Нам не надо посылать заголовки, так что просто лениво получаем/даем все из редиса
-=begin
   post '/' do
     content_type 'application/json'
     api_response = {}

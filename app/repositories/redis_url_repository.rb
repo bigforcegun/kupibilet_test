@@ -21,6 +21,9 @@ class RedisUrlRepository < UrlRepository
     super
   end
 
+  def find_or_create_short_url(url)
+    #pass
+  end
 
   def load_long_url_by_key(url_key)
     create_connection
@@ -36,18 +39,24 @@ class RedisUrlRepository < UrlRepository
       get_primary_id.callback do |primary_id|
         url_key = Base62.encode(primary_id.to_i)
         set_short_url(url_key, url).callback do
+
           yield(url_key) if block_given?
         end
       end
     end
   end
 
+  # @return [EventMachine::Hiredis::Client]
   def clear_db
-    delete_all_hardcore_string = <<-HEREDOC
-      "return redis.call('del', unpack(redis.call('keys', ARGV[1])))" 0 #{@namespace}#{@namespace_separator}*
-    HEREDOC
+    create_connection
+    self.connection.flushdb
+  end
 
-    self.connection.eval(delete_all_hardcore_string)
+  # @return [nil]
+  def close
+    connection.close_connection
+    connection.pubsub.close_connection
+    return nil
   end
 
   protected
@@ -102,8 +111,16 @@ class RedisUrlRepository < UrlRepository
 
 
   # @return [EventMachine::Hiredis::Client]
+
   def create_connection
-    @connection ||= EM::Hiredis.connect(build_connection_string)
+    if @connection.nil?
+      @connection = EM::Hiredis.connect(build_connection_string)
+    end
+    unless @connection.connected?
+      @connection.reconnect_connection
+    end
+    @connection
   end
+
 
 end

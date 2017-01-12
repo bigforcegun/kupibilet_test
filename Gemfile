@@ -11,12 +11,14 @@ gem 'em-hiredis'
 
 group :test do
   gem 'rspec'
-  gem 'em-spec'#
-  gem 'em-rspec', :require => false
   gem 'rack-test'
   gem 'test-unit'
-  gem 'async_rack_test'
   gem 'faker'
+
+  #gem 'minitest'
+  #gem 'async_rack_test'
+  #gem 'em-spec'#
+  #gem 'em-rspec', :require => false
 end
 
 
