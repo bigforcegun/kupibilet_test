@@ -28,33 +28,32 @@ require File.expand_path '../config/environment', __FILE__
 
 def run(opts)
   #EM.run do
-    web_app = UrlShortenerApi.new
-    # define some defaults for our app
-    web_app = opts[:app]
-    server  = opts[:server] || 'thin'
-    host    = opts[:host] || web_app.settings.host
-    port    = opts[:port] || web_app.settings.port
+  web_app = opts[:app]
+  server  = opts[:server] || 'thin'
+  host    = opts[:host] || web_app.settings.host
+  port    = opts[:port] || web_app.settings.port
 
-    dispatch = Rack::Builder.app do
-      map '/' do
-        run web_app
-      end
+  dispatch = Rack::Builder.app do
+    map '/' do
+      run web_app
     end
+  end
 
-    # default construction
-    unless %w(thin hatetepe goliath).include? server
-      raise "Need an EM webserver, but #{server} isn't"
-    end
+  # default construction
+  unless %w(thin hatetepe goliath).include? server
+    raise "Need an EM webserver, but #{server} isn't"
+  end
 
-    # Start the web server. Note that you are free to run other tasks
-    # within your EM instance.
-    Rack::Server.start(
-        app:     dispatch,
-        server:  server,
-        Host:    host,
-        Port:    port,
-        signals: false,
-    )
+
+  # Start the web server. Note that you are free to run other tasks
+  # within your EM instance.
+  Rack::Server.start(
+      app:     dispatch,
+      server:  server,
+      Host:    host,
+      Port:    port,
+      signals: false,
+  )
   #end
 end
 

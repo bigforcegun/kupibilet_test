@@ -32,7 +32,6 @@ class RedisUrlRepository < UrlRepository
 
   def create_new_short_url(url)
     create_connection
-    #clear_db
     inc_primary_id.callback do
       get_primary_id.callback do |primary_id|
         url_key = Base62.encode(primary_id.to_i)
@@ -44,7 +43,7 @@ class RedisUrlRepository < UrlRepository
   end
 
   def clear_db
-    delete_all_hardcore_string =  <<-HEREDOC
+    delete_all_hardcore_string = <<-HEREDOC
       "return redis.call('del', unpack(redis.call('keys', ARGV[1])))" 0 #{@namespace}#{@namespace_separator}*
     HEREDOC
 
@@ -72,7 +71,7 @@ class RedisUrlRepository < UrlRepository
 
   # @return [EventMachine::Hiredis::Client]
   def reset_primary_id
-    self.connection.set(build_primary_key,0)
+    self.connection.set(build_primary_key, 0)
   end
 
   # @return [EventMachine::Hiredis::Client]

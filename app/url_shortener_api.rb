@@ -36,7 +36,7 @@ class UrlShortenerApi < Sinatra::Base
       request.body.rewind
       request_body = JSON.parse(request.body.read) rescue nil
       if request_body.nil? || !request_body.include?('longUrl')
-        respond_with_error('Incorrect input json' )
+        respond_with_error('Incorrect input json')
       end
       long_url = request_body['longUrl']
       if long_url.nil? || long_url.scan(URI.regexp).size == 0
@@ -61,35 +61,34 @@ class UrlShortenerApi < Sinatra::Base
     begin
       url_key = aparams[:url_key]
       if url_key.nil?
-        arespond_with_error("Can't found url or provided key '#{url_key}'")
+        respond_with_error("Can't found url or provided key '#{url_key}'")
       end
       self.url_repository.load_long_url_by_key(url_key) do |long_url|
         if long_url.nil?
-          arespond_with_error("Can't found url or provided key '#{url_key}'")
+          respond_with_error("Can't found url or provided key '#{url_key}'")
         else
-          p long_url
-          arespond_with_redirect(long_url)
+          respond_with_redirect(long_url)
         end
       end
     rescue => e
-      arespond_with_error("Error while process request with message  #{e.message}")
+      respond_with_error("Error while process request with message  #{e.message}")
     end
   end
 
   apost '/' do
+
     content_type 'application/json'
     api_response = {}
-
-    #begin
+    begin
       long_url = get_long_url
 
       self.url_repository.create_new_short_url(long_url) do |url_key|
         api_response[:url] = build_redirect_url(url_key)
         respond_with_json(api_response)
       end
-    #rescue => e
-      #respond_with_json_error("Error while process request with message - #{e.message}")
-    #end
+    rescue => e
+      respond_with_json_error("Error while process request with message - #{e.message}")
+    end
 
   end
 
@@ -113,6 +112,5 @@ class UrlShortenerApi < Sinatra::Base
     end
   end
 =end
-
 
 end
